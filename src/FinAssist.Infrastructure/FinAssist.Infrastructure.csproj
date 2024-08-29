@@ -11,4 +11,18 @@
       <Folder Include="Implementations\" />
     </ItemGroup>
 
+    <ItemGroup>
+        <PackageReference Include="Dapper" Version="2.1.35" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.8" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.8"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+        <PackageReference Include="Npgsql" Version="8.0.3" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
+        <PackageReference Include="AutoMapper" Version="13.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\FinAssist.Domain\FinAssist.Domain.csproj" />
+    </ItemGroup>
+
 </Project>
