@@ -15,4 +15,4 @@ jobs:
         context: .
         push: true
         tags: |
-          ${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME }}:0.0.1
+          ${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME }}:${{ vars.DEV_VERSION }}
