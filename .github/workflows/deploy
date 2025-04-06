@@ -1,0 +1,16 @@
+name: Deploy for registry
+
+on: workflow_dispatch
+
+jobs: 
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps: 
+    - name: Deploy
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: |
+          ${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME }}:0.0.1
