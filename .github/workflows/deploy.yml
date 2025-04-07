@@ -1,18 +1,30 @@
-name: Deploy for registry
+name: Deploy to registry
 
 on: workflow_dispatch
 
-jobs: 
-  deploy:
-    runs-on: ubuntu-latest
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
 
-    steps: 
-    - uses: actions/checkout@v4
-    
-    - name: Deploy
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        push: true
-        tags: |
-          ${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME }}:${{ vars.DEV_VERSION }}
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Deploy to registry
+              uses: docker/build-push-action@v5
+              with:
+                  context: .
+                  push: true
+                  tags: |
+                      ${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME }}:${{ vars.DEV_VERSION }}
+
+            - name: Deploy to server
+              uses: appleboy/ssh-action@v0.1.10
+              with:
+                  host: ${{ secrets.SSH_HOST }}
+                  username: ${{ secrets.SSH_USER }}
+                  key: ${{ secrets.SSH_KEY }}
+                  script: |
+                      docker pull ${{ vars.IMAGE_NAME }}:${{ vars.DEV_VERSION }}
+                      docker stop finass_backend || true
+                      docker rm finass_backend || true
+                      docker run -d --name finass_backend --network "proxy" ${{ vars.IMAGE_NAME }}:${{ vars.DEV_VERSION }}
