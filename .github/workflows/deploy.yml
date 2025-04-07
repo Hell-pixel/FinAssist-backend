@@ -1,15 +1,28 @@
-name: Deploy to registry
+name: Deploy
 
-on: workflow_dispatch
+on:
+    workflow_dispatch:
+        inputs:
+            deploy_target:
+                description: 'Select deploy step'
+                required: true
+                default: 'all'
+                type: choice
+                options:
+                    - all
+                    - registry
+                    - server
 
 jobs:
-    deploy:
+    push-to-registry:
+        if: ${{ github.event.inputs.deploy_target == 'all' || github.event.inputs.deploy_target == 'registry' }}
         runs-on: ubuntu-latest
+        name: Push Docker image to registry
 
         steps:
             - uses: actions/checkout@v4
 
-            - name: Deploy to registry
+            - name: Build and push Docker image
               uses: docker/build-push-action@v5
               with:
                   context: .
@@ -17,14 +30,21 @@ jobs:
                   tags: |
                       ${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME }}:${{ vars.DEV_VERSION }}
 
-            - name: Deploy to server
+    deploy-to-server:
+        if: ${{ github.event.inputs.deploy_target == 'all' || github.event.inputs.deploy_target == 'server' }}
+        needs: [push-to-registry]
+        runs-on: ubuntu-latest
+        name: Deploy image on server
+
+        steps:
+            - name: SSH and deploy container
               uses: appleboy/ssh-action@v0.1.10
               with:
                   host: ${{ secrets.SSH_HOST }}
                   username: ${{ secrets.SSH_USER }}
                   key: ${{ secrets.SSH_KEY }}
                   script: |
-                      docker pull ${{ vars.IMAGE_NAME }}:${{ vars.DEV_VERSION }}
+                      docker pull ${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME }}:${{ vars.DEV_VERSION }}
                       docker stop finass_backend || true
                       docker rm finass_backend || true
-                      docker run -d --name finass_backend --network "proxy" ${{ vars.IMAGE_NAME }}:${{ vars.DEV_VERSION }}
+                      docker run -d --name finass_backend --network "proxy" ${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME }}:${{ vars.DEV_VERSION }}
