@@ -32,7 +32,7 @@ jobs:
 
     deploy-to-server:
         if: ${{ github.event.inputs.deploy_target == 'all' || github.event.inputs.deploy_target == 'server' }}
-        needs: [push-to-registry]
+        #needs: [push-to-registry]
         runs-on: ubuntu-latest
         name: Deploy image on server
 
