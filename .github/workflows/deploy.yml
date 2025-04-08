@@ -1,73 +1,73 @@
 name: Deploy
 
 on:
-    workflow_dispatch:
-        inputs:
-            deploy_target:
-                description: 'Select deploy step'
-                required: true
-                default: 'all'
-                type: choice
-                options:
-                    - all
-                    - registry
-                    - server
+  workflow_dispatch:
+    inputs:
+      deploy_target:
+        description: 'Select deploy step'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - registry
+          - server
 
 env:
-    DEPLOY_TARGET: ${{ github.event.inputs.deploy_target }}
-    IMAGE_TAG: ${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME }}:${{ vars.DEV_VERSION }}
+  DEPLOY_TARGET: ${{ github.event.inputs.deploy_target }}
+  IMAGE_TAG: ${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME }}:${{ vars.DEV_VERSION }}
 
 jobs:
-    push-to-registry:
-        if: env.DEPLOY_TARGET == 'all' || env.DEPLOY_TARGET == 'registry'
-        runs-on: ubuntu-latest
-        name: Push Docker image to registry
+  push-to-registry:
+    if: env.DEPLOY_TARGET == 'all' || env.DEPLOY_TARGET == 'registry'
+    runs-on: ubuntu-latest
+    name: Push Docker image to registry
 
-        steps:
-            - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-            - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-            - name: Cache Docker layers
-              uses: actions/cache@v4
-              with:
-                  path: /tmp/.buildx-cache
-                  key: ${{ runner.os }}-buildx-${{ hashFiles('**/*.csproj', '**/*.sln') }}
-                  restore-keys: |
-                      ${{ runner.os }}-buildx-
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ hashFiles('**/*.csproj', '**/*.sln') }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
 
-            - name: Build and push Docker image
-              uses: docker/build-push-action@v5
-              with:
-                  context: .
-                  push: true
-                  tags: ${{ env.IMAGE_TAG }}
-                  cache-from: type=local,src=/tmp/.buildx-cache
-                  cache-to: type=local,dest=/tmp/.buildx-cache
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ env.IMAGE_TAG }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
 
-    deploy-to-server:
-        if: env.DEPLOY_TARGET == 'all' || env.DEPLOY_TARGET == 'server'
-        runs-on: ubuntu-latest
-        name: Deploy image on server
+  deploy-to-server:
+    if: env.DEPLOY_TARGET == 'all' || env.DEPLOY_TARGET == 'server'
+    runs-on: ubuntu-latest
+    name: Deploy image on server
 
-        steps:
-            - name: Print deploy target
-              run: echo "Deploy target is $DEPLOY_TARGET"
+    steps:
+      - name: Print deploy target
+        run: echo "Deploy target is $DEPLOY_TARGET"
 
-            - name: SSH and deploy container
-              uses: appleboy/ssh-action@v0.1.10
-              with:
-                  host: ${{ secrets.SSH_HOST }}
-                  username: ${{ secrets.SSH_USER }}
-                  key: ${{ secrets.SSH_KEY }}
-                  script: |
-                      echo "Pulling image: ${{ env.IMAGE_TAG }}"
-                      docker pull ${{ env.IMAGE_TAG }}
-                      docker stop finass_backend || true
-                      docker rm finass_backend || true
-                      docker run -d \
-                        --name finass_backend \
-                        --network "proxy" \
-                        --restart unless-stopped \
-                        ${{ env.IMAGE_TAG }}
+      - name: SSH and deploy container
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            echo "Pulling image: ${{ env.IMAGE_TAG }}"
+            docker pull ${{ env.IMAGE_TAG }}
+            docker stop finass_backend || true
+            docker rm finass_backend || true
+            docker run -d \
+              --name finass_backend \
+              --network "proxy" \
+              --restart unless-stopped \
+              ${{ env.IMAGE_TAG }}
