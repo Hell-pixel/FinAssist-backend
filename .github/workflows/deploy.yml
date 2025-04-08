@@ -12,10 +12,11 @@ on:
                     - all
                     - registry
                     - server
+                    - redeploy
 
 jobs:
     push-to-registry:
-        if: ${{ github.event.inputs.deploy_target == 'all' || github.event.inputs.deploy_target == 'registry' }}
+        if: ${{ (github.ref == 'refs/heads/master') && (github.event.inputs.deploy_target == 'all' || github.event.inputs.deploy_target == 'registry') }}
         runs-on: ubuntu-latest
         name: Push Docker image to registry
 
@@ -25,32 +26,20 @@ jobs:
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v3
 
-            - name: Cache Docker layers
-              uses: actions/cache@v4
-              with:
-                  path: /tmp/.buildx-cache
-                  key: ${{ runner.os }}-buildx-${{ hashFiles('**/*.csproj', '**/*.sln') }}
-                  restore-keys: |
-                      ${{ runner.os }}-buildx-
-
             - name: Build and push Docker image
               uses: docker/build-push-action@v5
               with:
                   context: .
                   push: true
                   tags: ${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME }}:${{ vars.DEV_VERSION }}
-                  cache-from: type=local,src=/tmp/.buildx-cache
-                  cache-to: type=local,dest=/tmp/.buildx-cache
 
     deploy-to-server:
-        if: ${{ github.event.inputs.deploy_target == 'all' || github.event.inputs.deploy_target == 'server' }}
+        if: ${{ (github.ref == 'refs/heads/master') && (github.event.inputs.deploy_target == 'all' || github.event.inputs.deploy_target == 'server') }}
+        needs: push-to-registry
         runs-on: ubuntu-latest
         name: Deploy image on server
 
         steps:
-            - name: Print deploy target
-              run: echo "Deploy target is ${{ github.event.inputs.deploy_target }}"
-
             - name: SSH and deploy container
               uses: appleboy/ssh-action@v0.1.10
               with:
@@ -60,6 +49,30 @@ jobs:
                   script: |
                       IMAGE=${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME }}:${{ vars.DEV_VERSION }}
                       echo "Pulling image: $IMAGE"
+                      docker pull $IMAGE
+                      docker stop finass_backend || true
+                      docker rm finass_backend || true
+                      docker run -d \
+                        --name finass_backend \
+                        --network "proxy" \
+                        --restart unless-stopped \
+                        $IMAGE
+
+    force-redeploy:
+        if: ${{ github.ref == 'refs/heads/master' && github.event.inputs.deploy_target == 'redeploy' }}
+        runs-on: ubuntu-latest
+        name: Force redeploy to server (no build)
+
+        steps:
+            - name: SSH and redeploy container
+              uses: appleboy/ssh-action@v0.1.10
+              with:
+                  host: ${{ secrets.SSH_HOST }}
+                  username: ${{ secrets.SSH_USER }}
+                  key: ${{ secrets.SSH_KEY }}
+                  script: |
+                      IMAGE=${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME }}:${{ vars.DEV_VERSION }}
+                      echo "Re-deploying image: $IMAGE"
                       docker pull $IMAGE
                       docker stop finass_backend || true
                       docker rm finass_backend || true
