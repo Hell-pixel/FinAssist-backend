@@ -13,30 +13,48 @@ on:
                     - registry
                     - server
 
+env:
+    DEPLOY_TARGET: ${{ github.event.inputs.deploy_target }}
+    IMAGE_TAG: ${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME }}:${{ vars.DEV_VERSION }}
+
 jobs:
     push-to-registry:
-        if: ${{ github.event.inputs.deploy_target == 'all' || github.event.inputs.deploy_target == 'registry' }}
+        if: env.DEPLOY_TARGET == 'all' || env.DEPLOY_TARGET == 'registry'
         runs-on: ubuntu-latest
         name: Push Docker image to registry
 
         steps:
             - uses: actions/checkout@v4
 
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
+
+            - name: Cache Docker layers
+              uses: actions/cache@v4
+              with:
+                  path: /tmp/.buildx-cache
+                  key: ${{ runner.os }}-buildx-${{ hashFiles('**/*.csproj', '**/*.sln') }}
+                  restore-keys: |
+                      ${{ runner.os }}-buildx-
+
             - name: Build and push Docker image
               uses: docker/build-push-action@v5
               with:
                   context: .
                   push: true
-                  tags: |
-                      ${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME }}:${{ vars.DEV_VERSION }}
+                  tags: ${{ env.IMAGE_TAG }}
+                  cache-from: type=local,src=/tmp/.buildx-cache
+                  cache-to: type=local,dest=/tmp/.buildx-cache
 
     deploy-to-server:
-        if: ${{ github.event.inputs.deploy_target == 'all' || github.event.inputs.deploy_target == 'server' }}
-        needs: [push-to-registry]
+        if: env.DEPLOY_TARGET == 'all' || env.DEPLOY_TARGET == 'server'
         runs-on: ubuntu-latest
         name: Deploy image on server
 
         steps:
+            - name: Print deploy target
+              run: echo "Deploy target is $DEPLOY_TARGET"
+
             - name: SSH and deploy container
               uses: appleboy/ssh-action@v0.1.10
               with:
@@ -44,7 +62,12 @@ jobs:
                   username: ${{ secrets.SSH_USER }}
                   key: ${{ secrets.SSH_KEY }}
                   script: |
-                      docker pull ${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME }}:${{ vars.DEV_VERSION }}
+                      echo "Pulling image: ${{ env.IMAGE_TAG }}"
+                      docker pull ${{ env.IMAGE_TAG }}
                       docker stop finass_backend || true
                       docker rm finass_backend || true
-                      docker run -d --name finass_backend --network "proxy" ${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME }}:${{ vars.DEV_VERSION }}
+                      docker run -d \
+                        --name finass_backend \
+                        --network "proxy" \
+                        --restart unless-stopped \
+                        ${{ env.IMAGE_TAG }}
