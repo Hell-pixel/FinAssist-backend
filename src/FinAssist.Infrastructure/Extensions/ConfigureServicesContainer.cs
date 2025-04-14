@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FinAssist.Infrastructure.Persistence.Context;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.OpenApi.Any;
@@ -9,6 +11,17 @@ namespace FinAssist.Infrastructure.Extensions;
 
 public static class ConfigureServicesContainer
 {
+    public static void ConfigureDbContext(this IServiceCollection services, IConfiguration configuration)
+    {
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        if (connectionString is null)
+        {
+            throw new Exception("Connection string not found.");
+        }
+
+        services.AddSingleton(new DapperContext(connectionString));
+    }
+
     public static void ConfigureSwagger(this IServiceCollection services, string assemblyName)
     {
         services.AddSwaggerGen(c =>
@@ -53,13 +66,14 @@ public static class ConfigureServicesContainer
 
     public static void ConfigureControllers(this IServiceCollection services)
     {
-        services.AddControllers(options =>
-            {
-                options.Filters.Add(new ProducesAttribute("application/json"));
-            })
+        services.AddControllers(options => { options.Filters.Add(new ProducesAttribute("application/json")); })
             .AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.Converters.Add(new StringEnumConverter { AllowIntegerValues = false });
             });
+    }
+
+    public static void ConfigureDependencyContainer(this IServiceCollection services, IConfiguration configuration)
+    {
     }
 }

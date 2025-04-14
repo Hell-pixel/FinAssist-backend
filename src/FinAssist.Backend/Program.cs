@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 var services = builder.Services;
 
+services.ConfigureDbContext(builder.Configuration);
 services.ConfigureControllers();
 services.ConfigureHealthChecks();
 services.ConfigureSwagger(Assembly.GetExecutingAssembly().GetName().Name!);
