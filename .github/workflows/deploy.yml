@@ -1,0 +1,63 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  push-to-registry:
+    runs-on: ubuntu-latest
+    name: Push Docker image to registry
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME }}:${{ vars.DEV_VERSION }}
+
+  verify-container:
+    runs-on: ubuntu-latest
+    name: Verify container restarted
+    needs: push-to-registry
+
+    steps:
+      - name: Wait a bit before checking
+        run: sleep 30
+
+      - name: Check container status and uptime
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            CONTAINER_NAME=finass_backend
+            if ! docker inspect "$CONTAINER_NAME" > /dev/null 2>&1; then
+              echo "❌ Контейнер $CONTAINER_NAME не найден"
+              exit 1
+            fi
+
+            started=$(docker inspect -f '{{ .State.StartedAt }}' $CONTAINER_NAME)
+            echo "Container $CONTAINER_NAME started at: $started"
+
+            now=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+            echo "Now: $now"
+
+            started_ts=$(date -d "$started" +%s)
+            now_ts=$(date -d "$now" +%s)
+            delta=$((now_ts - started_ts))
+
+            echo "Seconds since container start: $delta"
+
+            if [ "$delta" -gt 300 ]; then
+              echo "❌ Контейнер не перезапускался в последние 5 минут"
+              exit 1
+            else
+              echo "✅ Контейнер работает и был недавно перезапущен"
+            fi

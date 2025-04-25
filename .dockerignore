@@ -1,0 +1,27 @@
+# Git
+.git
+.gitignore
+
+# Build artifacts
+bin/
+obj/
+*.user
+*.suo
+
+# VS Code / IDE
+.vscode/
+.idea/
+*.csproj.user
+
+# Docker / CI
+.dockerignore
+docker-compose*
+
+# Logs
+*.log
+logs/
+*.tmp
+
+# System
+*.DS_Store
+Thumbs.db
