@@ -4,17 +4,13 @@
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <LangVersion>13</LangVersion>
     </PropertyGroup>
 
     <PropertyGroup>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <NoWarn>$(NoWarn);1591</NoWarn>
     </PropertyGroup>
-
-    <ItemGroup>
-      <Folder Include="Middlewares\" />
-      <Folder Include="MapperProfiles\" />
-    </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\FinAssist.Infrastructure\FinAssist.Infrastructure.csproj" />

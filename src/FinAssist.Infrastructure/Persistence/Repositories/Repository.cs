@@ -1,49 +1,67 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Reflection;
+﻿using System.Data;
 using Dapper;
+using FinAssist.Domain.Entities;
 using FinAssist.Domain.Repositories;
 using FinAssist.Infrastructure.Persistence.Context;
 using FinAssist.Infrastructure.Persistence.Utils;
 
 namespace FinAssist.Infrastructure.Persistence.Repositories;
 
-public abstract class Repository<TEntity> : IRepository<TEntity> where TEntity : class
+public abstract class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEntity
 {
-    private readonly DapperContext _context;
-    private readonly string _tableName;
-    private readonly string _keyColumnName;
+    protected readonly DapperContext Context;
+    protected readonly string TableName;
+    protected readonly string KeyColumnName;
 
     protected Repository(DapperContext context)
     {
-        _context = context;
-        _tableName = DatabaseTableHelper.GetTableName<TEntity>();
+        Context = context;
+        TableName = DatabaseTableHelper.GetTableName<TEntity>();
+        KeyColumnName = DatabaseTableHelper.GetKeyColumnName<TEntity>();
     }
 
-    public Task<TEntity> GetById(Guid id)
+    public async Task<TEntity?> GetById(Guid id)
     {
-        using var connection = _context.CreateConnection();
-        throw new NotImplementedException();
+        using var connection = Context.CreateConnection();
+        var query = $"SELECT * FROM {TableName} WHERE {KeyColumnName} = @Id";
+        return await connection.QuerySingleOrDefaultAsync<TEntity>(query, new { Id = id });
     }
 
-    public Task<IEnumerable<TEntity>> GetAll()
+    public async Task<IEnumerable<TEntity>> GetAll()
     {
-        throw new NotImplementedException();
+        using var connection = Context.CreateConnection();
+        var query = $"SELECT * FROM {TableName}";
+        return await connection.QueryAsync<TEntity>(query);
     }
 
-    public Task Insert(TEntity entity)
+    public async Task Insert(TEntity entity)
     {
-        throw new NotImplementedException();
+        using var connection = Context.CreateConnection();
+        var columns = string.Join(", ", DatabaseTableHelper.GetColumnNames<TEntity>());
+        var values = string.Join(", ", DatabaseTableHelper.GetParameterNames<TEntity>());
+
+        entity.CreatedAt = DateTime.Now;
+
+        var query = $"INSERT INTO {TableName} ({columns}) VALUES ({values})";
+        await connection.ExecuteAsync(query, entity);
     }
 
-    public Task Update(TEntity entity)
+    public async Task Update(TEntity entity)
     {
-        throw new NotImplementedException();
+        using var connection = Context.CreateConnection();
+
+        var setParameters = string.Join(", ", DatabaseTableHelper.GetSetParameters<TEntity>(KeyColumnName));
+        
+        entity.UpdatedAt = DateTime.UtcNow;
+
+        var query = $"UPDATE {TableName} SET {setParameters} WHERE {KeyColumnName} = @Id";
+        await connection.ExecuteAsync(query, entity);
     }
 
-    public Task Delete(Guid id)
+    public async Task Delete(Guid id)
     {
-        throw new NotImplementedException();
+        var connection = Context.CreateConnection();
+        var query = $"DELETE FROM {TableName} WHERE {KeyColumnName} = @Id";
+        await connection.ExecuteAsync(query, new { Id = id });
     }
-
-
 }
