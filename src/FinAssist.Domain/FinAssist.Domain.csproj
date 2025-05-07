@@ -4,12 +4,7 @@
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <LangVersion>13</LangVersion>
     </PropertyGroup>
-
-    <ItemGroup>
-      <Folder Include="Configuration\" />
-      <Folder Include="Dtos\" />
-      <Folder Include="Interfaces\" />
-    </ItemGroup>
 
 </Project>
