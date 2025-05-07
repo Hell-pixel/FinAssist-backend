@@ -98,7 +98,8 @@ public class AccountService : IAccountService
             Token = token,
             TokenType = TokenType,
             ExpiresIn = AppConfiguration.JwtConfiguration.SessionLifeTime,
-            RefreshToken = refreshToken
+            RefreshToken = refreshToken,
+            RefreshTokenExpiresIn = AppConfiguration.JwtConfiguration.RefreshTokenLifeTime
         };
     }
     
@@ -128,7 +129,8 @@ public class AccountService : IAccountService
             Token = token,
             TokenType = TokenType,
             ExpiresIn = AppConfiguration.JwtConfiguration.SessionLifeTime,
-            RefreshToken = newRefreshToken
+            RefreshToken = newRefreshToken,
+            RefreshTokenExpiresIn = AppConfiguration.JwtConfiguration.RefreshTokenLifeTime
         };
     }
 

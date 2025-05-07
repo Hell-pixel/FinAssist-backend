@@ -72,15 +72,6 @@ public static class ConfigureServicesContainer
         services.AddHealthChecks();
     }
 
-    public static void ConfigureControllers(this IServiceCollection services)
-    {
-        services.AddControllers(options => { options.Filters.Add(new ProducesAttribute("application/json")); })
-            .AddNewtonsoftJson(options =>
-            {
-                options.SerializerSettings.Converters.Add(new StringEnumConverter { AllowIntegerValues = false });
-            });
-    }
-
     public static void ConfigureDependencyContainer(this IServiceCollection services)
     {
         var appRepositories = typeof(ReflectionMarker).Assembly.GetTypes()
