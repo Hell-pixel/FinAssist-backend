@@ -57,8 +57,8 @@ public static class NotificationTemplates
                 BodyText = """
                            Вы успешно вошли в систему FinAssist.
 
-                           📱 Устройство: {{UserAgent}}
                            🌐 IP-адрес: {{IPAddress}}
+                           📱 Устройство: {{UserAgent}}
                            🕒 Дата и время: {{LoginTime}}
 
                            Если это были не вы, завершите все активные сессии по ссылке: {{SessionManagementUrl}} и смените пароль.
