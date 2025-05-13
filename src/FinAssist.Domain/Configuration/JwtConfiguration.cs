@@ -2,9 +2,9 @@
 
 public class JwtConfiguration
 {
-    public string SecurityKey { get; init; }
+    public required string SecurityKey { get; init; }
     public double SessionLifeTime { get; init; }
     public double RefreshTokenLifeTime { get; init; }
-    public string Issuer { get; init; }
-    public string Audience { get; init; }
+    public required string Issuer { get; init; }
+    public required string Audience { get; init; }
 }

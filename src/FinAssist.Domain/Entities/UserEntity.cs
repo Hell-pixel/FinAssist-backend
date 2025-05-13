@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using FinAssist.Domain.Notification.Providers;
 
 namespace FinAssist.Domain.Entities;
 
@@ -44,6 +45,11 @@ public class UserEntity : BaseEntity
     /// Счетчик неудачных попыток входа
     /// </summary>
     public int AccessFailedCount { get; set; }
+    
+    /// <summary>
+    /// Провайдер уведомлений (по умолчанию Email)
+    /// </summary>
+    public NotificationProviderType NotificationProvider { get; set; } = NotificationProviderType.Email;
     
     /// <summary>
     /// Сессии пользователя

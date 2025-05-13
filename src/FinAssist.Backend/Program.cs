@@ -9,9 +9,6 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Newtonsoft.Json.Converters;
-using VaultSharp;
-using VaultSharp.V1.AuthMethods.Token;
-using VaultSharp.V1.Commons;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,9 +56,9 @@ services.AddFluentValidationRulesToSwagger();
 
 services.AddCors(o =>
 {
-    o.AddPolicy("dev", builder =>
+    o.AddPolicy("dev", policyBuilder =>
     {
-        builder
+        policyBuilder
             .AllowCredentials()
             .AllowAnyHeader()
             .AllowAnyMethod()

@@ -106,7 +106,8 @@ public class AuthHandler : AuthenticationHandler<AppAuthenticationSchemeOptions>
             Id = userEntity.Id,
             Email = userEntity.Email,
             Name = userEntity.Name,
-            CurrentSessionId = userSession.Id
+            CurrentSessionId = userSession.Id,
+            NotificationProvider = userEntity.NotificationProvider
         };
 
         _currentUserService.Set(user);
