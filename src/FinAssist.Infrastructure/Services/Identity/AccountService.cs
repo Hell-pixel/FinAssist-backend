@@ -104,7 +104,7 @@ public class AccountService : IAccountService
             {
                 { "UserAgent", userAgent },
                 { "IPAddress", realIp ?? "Неизвестно" },
-                { "LoginTime", DateTime.UtcNow.ToString("dd.MM.yyyy hh:mm UTCz ") },
+                { "LoginTime", DateTime.UtcNow.ToString("dd.MM.yyyy HH:mm UTCz") },
                 { "SessionManagementUrl", $"{AppConfiguration.NotificationConfiguration.AppUrl}/account/sessions" } // TODO: replace with real url
             });
 
