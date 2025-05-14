@@ -1,3 +1,4 @@
+using FinAssist.Domain.Enums;
 using FinAssist.Domain.Notification.Providers;
 using FluentMigrator;
 

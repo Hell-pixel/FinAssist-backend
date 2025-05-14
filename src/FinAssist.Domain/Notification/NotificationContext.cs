@@ -1,4 +1,5 @@
-﻿using FinAssist.Domain.Notification.Providers;
+﻿using FinAssist.Domain.Enums;
+using FinAssist.Domain.Notification.Providers;
 
 namespace FinAssist.Domain.Notification;
 
