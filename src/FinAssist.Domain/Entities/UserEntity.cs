@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using FinAssist.Domain.Enums;
 using FinAssist.Domain.Notification.Providers;
 
 namespace FinAssist.Domain.Entities;

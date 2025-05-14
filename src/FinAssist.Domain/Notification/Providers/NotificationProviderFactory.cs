@@ -1,4 +1,6 @@
-﻿namespace FinAssist.Domain.Notification.Providers;
+﻿using FinAssist.Domain.Enums;
+
+namespace FinAssist.Domain.Notification.Providers;
 
 public interface INotificationProviderFactory
 {

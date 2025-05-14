@@ -1,4 +1,5 @@
-﻿using FinAssist.Domain.Notification.Providers;
+﻿using FinAssist.Domain.Enums;
+using FinAssist.Domain.Notification.Providers;
 using FinAssist.Domain.Services.Identity;
 using FinAssist.Infrastructure.Configuration;
 using Microsoft.Extensions.DependencyInjection;
