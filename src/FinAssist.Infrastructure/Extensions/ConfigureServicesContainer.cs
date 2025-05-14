@@ -1,14 +1,16 @@
 ﻿using System.Text;
 using FinAssist.Domain.Common;
 using FinAssist.Domain.Configuration;
+using FinAssist.Domain.Notification.Providers;
+using FinAssist.Domain.Services.Notification;
 using FinAssist.Infrastructure.Persistence.Context;
 using FluentMigrator.Runner;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
-using Newtonsoft.Json.Converters;
 using FinAssist.Infrastructure.Handlers;
+using FinAssist.Infrastructure.Notification;
+using FinAssist.Infrastructure.Notification.Providers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -97,6 +99,10 @@ public static class ConfigureServicesContainer
                 services.Add(new ServiceDescriptor(interfaceType, appService, ServiceLifetime.Scoped));
             }
         }
+
+        services.AddScoped<INotificationProviderFactory, NotificationProviderFactory>();
+        services.AddScoped<NullNotificationProvider>();
+        services.AddScoped<SmtpNotificationProvider>();
     }
 
     public static void ConfigureAuthentication(this IServiceCollection services, IConfiguration configuration)
