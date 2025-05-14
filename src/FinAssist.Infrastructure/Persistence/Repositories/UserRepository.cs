@@ -15,8 +15,12 @@ public class UserRepository : Repository<UserEntity>, IUserRepository
     public async Task<UserEntity?> GetByEmail(string email)
     {
         using var connection = Context.CreateConnection();
-        var emailColumn = DatabaseTableHelper.GetColumnName<UserEntity>(x => x.Email);
-        var query = $"SELECT * FROM {TableName} WHERE {emailColumn} = @Email";
+
+        var query = Q.Select().Where(x => x.Email == email);
+
+        var q = await GetList<UserEntity>(query);
+        
+        
         return await connection.QuerySingleOrDefaultAsync<UserEntity>(query, new { Email = email });
     }
 

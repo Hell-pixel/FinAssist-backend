@@ -5,7 +5,7 @@ using FinAssist.Domain.Notification.Providers;
 namespace FinAssist.Domain.Entities;
 
 [Table("Users")]
-public class UserEntity : BaseEntity
+public class UserEntity : BaseEntity, IDataBaseDocument
 {
     /// <summary>
     /// Имя пользователя
