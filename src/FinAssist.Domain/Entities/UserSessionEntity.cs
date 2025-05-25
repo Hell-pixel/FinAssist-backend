@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace FinAssist.Domain.Entities;
 
 [Table("UserSessions")]
-public class UserSessionEntity : BaseEntity
+public class UserSessionEntity : BaseEntity, IDataBaseDocument
 {
     /// <summary>
     /// Идентификатор пользователя

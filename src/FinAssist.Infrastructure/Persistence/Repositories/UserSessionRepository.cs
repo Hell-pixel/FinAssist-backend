@@ -15,7 +15,7 @@ public class UserSessionRepository : Repository<UserSessionEntity>, IUserSession
     {
         using var connection = Context.CreateConnection();
 
-        var sql = @$"
+        /*var sql = @$"
         SELECT s.*, u.*
         FROM {TableName} s
         INNER JOIN {DatabaseTableHelper.GetTableName<UserEntity>()} u ON s.{GetEscapedString("UserId")} = u.{GetEscapedString("Id")}
@@ -32,12 +32,13 @@ public class UserSessionRepository : Repository<UserSessionEntity>, IUserSession
             splitOn: "Id"
         );
 
-        return result.FirstOrDefault();
+        return result.FirstOrDefault();*/
+        return null;
     }
     
     public async Task<IEnumerable<UserSessionEntity>> GetByUserId(Guid userId)
     {
-        using var connection = Context.CreateConnection();
+        /*using var connection = Context.CreateConnection();
         var query = $@"
         SELECT * 
         FROM {TableName} 
@@ -47,12 +48,14 @@ public class UserSessionRepository : Repository<UserSessionEntity>, IUserSession
         return await connection.QueryAsync<UserSessionEntity>(query, new
         {
             UserId = userId
-        });
+        });*/
+        return [];
     }
     
     public async Task<UserSessionEntity?> GetByRefreshTokenHash(string refreshTokenHash)
     {
-        using var connection = Context.CreateConnection();
+        return default;
+        /*using var connection = Context.CreateConnection();
         var query = $@"
         SELECT * 
         FROM {TableName} 
@@ -62,13 +65,13 @@ public class UserSessionRepository : Repository<UserSessionEntity>, IUserSession
         return await connection.QuerySingleOrDefaultAsync<UserSessionEntity>(query, new
         {
             RefreshTokenHash = refreshTokenHash
-        });
+        });*/
     }
     
     public async Task DeleteAllByUserId(Guid userId)
     {
-        var connection = Context.CreateConnection();
+        /*var connection = Context.CreateConnection();
         var query = $"DELETE FROM {TableName} WHERE {GetEscapedString("UserId")} = @UserId";
-        await connection.ExecuteAsync(query, new { UserId = userId });
+        await connection.ExecuteAsync(query, new { UserId = userId });*/
     }
 }

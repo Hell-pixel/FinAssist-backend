@@ -1,37 +1,42 @@
-﻿using System.Data;
-using Dapper;
+﻿using Dapper;
 using FinAssist.Domain.Entities;
 using FinAssist.Domain.Repositories;
 using FinAssist.Infrastructure.Persistence.Context;
 using FinAssist.Infrastructure.Persistence.SqlBuilder;
-using FinAssist.Infrastructure.Persistence.Utils;
 
 namespace FinAssist.Infrastructure.Persistence.Repositories;
 
 public abstract class Repository<TEntity> : IRepository<TEntity> where TEntity : class, IDataBaseDocument
 {
     protected readonly DapperContext Context;
-    protected readonly string TableName;
-    protected readonly string KeyColumnName;
 
-    public QueryBuilder<TEntity> Q { get; } = new ();
+    public QueryBuilder<TEntity> Q { get; }
 
     protected Repository(DapperContext context)
     {
         Context = context;
+        Q = new QueryBuilder<TEntity>();
         //TableName = DatabaseTableHelper.GetTableName<TEntity>();
         //KeyColumnName = DatabaseTableHelper.GetKeyColumnName<TEntity>();
     }
 
     public async Task<TEntity?> GetById(Guid id)
     {
-        using var connection = Context.CreateConnection();
+        /*using var connection = Context.CreateConnection();
         var query = $"SELECT * FROM {TableName} WHERE {KeyColumnName} = @Id";
-        return await connection.QuerySingleOrDefaultAsync<TEntity>(query, new { Id = id });
+        return await connection.QuerySingleOrDefaultAsync<TEntity>(query, new { Id = id });*/
+        return null;
     }
 
     protected async Task<IEnumerable<TEntity>> GetList<T>(QueryBuilderBase<TEntity> builder)
         => await GetList<T>(builder.Query);
+
+    protected async Task<TEntity?> GetOne(QueryBuilderBase<TEntity> builder)
+    {
+        using var connection = Context.CreateConnection();
+        var collection = await connection.QueryAsync<TEntity>(builder.Query);
+        return collection.FirstOrDefault();
+    }
 
     private async Task<IEnumerable<TEntity>> GetList<T>(string query)
     {
@@ -41,9 +46,11 @@ public abstract class Repository<TEntity> : IRepository<TEntity> where TEntity :
 
     public async Task<IEnumerable<TEntity>> GetAll()
     {
+        return [];
+        /*
         using var connection = Context.CreateConnection();
-        var query = $"SELECT * FROM {TableName}";
-        return await connection.QueryAsync<TEntity>(query);
+        var query = $"SELECT * FROM {}";
+        return await connection.QueryAsync<TEntity>(query);*/
     }
 
     public async Task Insert(TEntity entity)
@@ -74,8 +81,9 @@ public abstract class Repository<TEntity> : IRepository<TEntity> where TEntity :
 
     public async Task Delete(Guid id)
     {
+        /*
         var connection = Context.CreateConnection();
         var query = $"DELETE FROM {TableName} WHERE {KeyColumnName} = @Id";
-        await connection.ExecuteAsync(query, new { Id = id });
+        await connection.ExecuteAsync(query, new { Id = id });*/
     }
 }

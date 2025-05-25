@@ -2,23 +2,20 @@
 
 namespace FinAssist.Infrastructure.Persistence.SqlBuilder;
 
-public class QueryBuilder<TDocument> where TDocument : IDataBaseDocument  
+public class QueryBuilder<TEntity> where TEntity : IDataBaseDocument
 {
-    private QueryBuilderSelect<TDocument> QSelect { get; }
-    private QueryBuilderInsert<TDocument> QInsert { get; }
+    private QueryBuilderSelect<TEntity> QSelect { get; }
+    private QueryBuilderInsert<TEntity> QInsert { get; }
 
     public QueryBuilder()
     {
-        QSelect = new QueryBuilderSelect<TDocument>();
-        QInsert = new QueryBuilderInsert<TDocument>();
+        QSelect = new QueryBuilderSelect<TEntity>();
+        QInsert = new QueryBuilderInsert<TEntity>();
     }
 
-    public QueryBuilderSelect<TDocument> Select<TDto>()
-        => QSelect.Select<TDto>();
-
-    public QueryBuilderSelect<TDocument> Select(params string[] queryFields)
+    public QueryBuilderSelect<TEntity> Select(params string[] queryFields)
         => QSelect.Select(queryFields);
 
-    public QueryBuilderInsert<TDocument> Insert(TDocument model)
-        => QInsert.Insert(model);
+    /*public QueryBuilderInsert<TDocument> Insert(TDocument model)
+        => QInsert.Insert(model);*/
 }

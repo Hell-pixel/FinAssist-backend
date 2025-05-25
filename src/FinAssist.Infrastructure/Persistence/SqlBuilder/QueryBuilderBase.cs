@@ -4,14 +4,14 @@ using FinAssist.Domain.Entities;
 
 namespace FinAssist.Infrastructure.Persistence.SqlBuilder;
 
-public class QueryBuilderBase<T> where T : IDataBaseDocument
+public class QueryBuilderBase<TEntity> where TEntity : IDataBaseDocument
 {
     public string Query { get; protected set; }
     protected string TableNameBase { get; }
 
     protected QueryBuilderBase()
     {
-        TableNameBase = GetTableName<T>();
+        TableNameBase = GetTableName<TEntity>();
     }
 
     protected string GetTableName<TDataBaseDocument>()
@@ -20,7 +20,7 @@ public class QueryBuilderBase<T> where T : IDataBaseDocument
         return attribute?.Name ?? throw new Exception("Not found TableAttribute of entity");
     }
 
-    public QueryBuilderBase<T> CustomQuery(string query)
+    public QueryBuilderBase<TEntity> CustomQuery(string query)
     {
         Query = query;
         return this;
@@ -33,7 +33,7 @@ public class QueryBuilderBase<T> where T : IDataBaseDocument
         => properties.Select(property => property.GetCustomAttribute<ColumnAttribute>())
             .Select(columnAttribute => columnAttribute.Name).ToArray();
 
-    protected string[] GetValues(PropertyInfo[] properties, T model)
+    protected string[] GetValues(PropertyInfo[] properties, TEntity model)
         => properties.Select(property => property.GetValue(model, null).ToString()).ToArray();
 
     protected string PrepareString(string value)

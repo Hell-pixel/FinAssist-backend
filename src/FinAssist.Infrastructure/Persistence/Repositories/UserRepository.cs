@@ -16,20 +16,20 @@ public class UserRepository : Repository<UserEntity>, IUserRepository
     {
         using var connection = Context.CreateConnection();
 
-        var query = Q.Select().Where(x => x.Email == email);
-
-        var q = await GetList<UserEntity>(query);
+        var query = Q
+            .Select()
+            .Where(x => x.Email == email);
         
-        
-        return await connection.QuerySingleOrDefaultAsync<UserEntity>(query, new { Email = email });
+        return await GetOne(query);
     }
 
     public async Task<bool> ExistsByEmail(string email)
     {
-        using var connection = Context.CreateConnection();
+        return false;
+        /*using var connection = Context.CreateConnection();
         var emailColumn = DatabaseTableHelper.GetColumnName<UserEntity>(x => x.Email);
         var query = $"SELECT COUNT(1) FROM {TableName} WHERE {emailColumn} = @Email";
         var count = await connection.ExecuteScalarAsync<int>(query, new { Email = email });
-        return count > 0;
+        return count > 0;*/
     }
 }
